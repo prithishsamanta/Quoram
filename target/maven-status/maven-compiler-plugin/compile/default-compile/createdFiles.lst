@@ -1,1 +1,10 @@
-com/quorum/App.class
+com/quorum/network/RaftServer.class
+com/quorum/client/QuorumClient.class
+com/quorum/client/ClientHandler.class
+com/quorum/server/RaftState.class
+com/quorum/server/LogEntry.class
+com/quorum/Main.class
+com/quorum/network/MessageHandler.class
+com/quorum/server/StateMachine.class
+com/quorum/server/RaftLog.class
+com/quorum/server/RaftNode.class
