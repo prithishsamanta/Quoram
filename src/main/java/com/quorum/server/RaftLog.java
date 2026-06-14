@@ -4,29 +4,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.quorum.server.LogEntry;
 
 public class RaftLog {
-    private final CopyOnWriteArrayList<LogEntry> entries;
+    private final List<LogEntry> entries;
 
     public RaftLog() {
-        this.entries = new CopyOnWriteArrayList<>();
+        this.entries = new ArrayList<>();
     }
 
     public void append(LogEntry entry) {
         entries.add(entry);
     }
 
-    public LogEntry getEntry(int index) {
-        return entries.get(index);
+    public synchronized LogEntry getEntry(int index) {
+        if (index < 1 || index > entries.size()) {
+            return null;
+        }
+        return entries.get(index - 1); // log index 1 = ArrayList position 0
     }
 
     public int getLastIndex() {
-        return entries.size() - 1;
+        return entries.isEmpty() ? 0 : entries.get(entries.size() - 1).getIndex();
     }
-
+    
     public int getLastTerm() {
-        return entries.get(entries.size() - 1).getTerm();
+        return entries.isEmpty() ? 0 : entries.get(entries.size() - 1).getTerm();
     }
 
     public void deleteFrom(int index) {

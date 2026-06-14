@@ -6,17 +6,18 @@ public class RaftNode {
     private final String id;
     private final List<String> peers;
     private final StateMachine stateMachine;
+    private final RaftLog raftLog;
 
     private RaftState state;
     private int currentTerm;
     private String votedFor;
-    
+
     public RaftNode(String id, List<String> peers, StateMachine stateMachine) {
         this.id = id;
         this.peers = peers;
         this.stateMachine = stateMachine;
+        this.raftLog = new RaftLog();
 
-        // Every node starts as a follower
         this.state = RaftState.FOLLOWER;
         this.currentTerm = 0;
         this.votedFor = null;
@@ -27,30 +28,27 @@ public class RaftNode {
     }
 
     public void handlePut(String key, String value) {
-        // Phase 1: direct to StateMachine
-        // Phase 4: will append to log, replicate, wait for majority
-        stateMachine.put(key, value);
+        String command = "PUT " + key + " " + value;
+        int newIndex = raftLog.getLastIndex() + 1;
+        LogEntry entry = new LogEntry(newIndex, currentTerm, command);
+        raftLog.append(entry);
+        stateMachine.apply(entry);
+        System.out.println("[" + id + "] Appended to log: " + entry);
     }
 
     public void handleDelete(String key) {
-        // Phase 1: direct to StateMachine
-        // Phase 4: will append to log, replicate, wait for majority
-        stateMachine.delete(key);
+        String command = "DELETE " + key;
+        int newIndex = raftLog.getLastIndex() + 1;
+        LogEntry entry = new LogEntry(newIndex, currentTerm, command);
+        raftLog.append(entry);
+        stateMachine.apply(entry);
+        System.out.println("[" + id + "] Appended to log: " + entry);
     }
 
-    public String getId() { 
-        return id; 
-    }
-    public List<String> getPeers() { 
-        return peers; 
-    }
-    public RaftState getState() { 
-        return state; 
-    }
-    public int getCurrentTerm() { 
-        return currentTerm; 
-    }
-    public String getVotedFor() { 
-        return votedFor; 
-    }
+    public String getId() { return id; }
+    public List<String> getPeers() { return peers; }
+    public RaftState getState() { return state; }
+    public int getCurrentTerm() { return currentTerm; }
+    public String getVotedFor() { return votedFor; }
+    public RaftLog getRaftLog() { return raftLog; }
 }

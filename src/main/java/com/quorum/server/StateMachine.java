@@ -10,18 +10,18 @@ public class StateMachine {
         this.store = new ConcurrentHashMap<>();
     }
 
-    // // apply a committed log entry
-    // public void apply(LogEntry entry){
-    //     String command = entry.getCommand();
-    //     String[] parts = command.split(" ");
-    //     if (parts[0].equals("PUT") && parts.length == 3) {
-    //         store.put(parts[1], parts[2]);
-    //     } else if (parts[0].equals("DELETE") && parts.length == 2) {
-    //         store.remove(parts[1]);
-    //     } else {
-    //         throw new IllegalArgumentException("Invalid command: " + command);
-    //     }
-    // }
+    // apply a committed log entry
+    public void apply(LogEntry entry){
+        String command = entry.getCommand();
+        String[] parts = command.split(" ");
+        if (parts[0].equals("PUT") && parts.length == 3) {
+            put(parts[1], parts[2]);
+        } else if (parts[0].equals("DELETE") && parts.length == 2) {
+            delete(parts[1]);
+        } else {
+            throw new IllegalArgumentException("Invalid command: " + command);
+        }
+    }
 
     // Called when a PUT command is committed
     public void put(String key, String value){
