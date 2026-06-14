@@ -77,7 +77,7 @@ target/quorum-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 ## Running A Single Node (Phase 1)
 
-### Step 1 — Start the node
+### Step 1: Start the node
 
 Open a terminal and run:
 
@@ -93,7 +93,7 @@ You should see:
 [Server] Listening on port 8001
 ```
 
-### Step 2 — Connect a client
+### Step 2: Connect a client
 
 Open a second terminal and connect with netcat:
 
@@ -101,7 +101,7 @@ Open a second terminal and connect with netcat:
 nc localhost 8001
 ```
 
-### Step 3 — Send commands
+### Step 3: Send commands
 
 Type each command and press Enter:
 
@@ -145,11 +145,11 @@ Response:
 
 ## Running A Three-Node Cluster (Phase 3+)
 
-### Step 1 — Start three nodes
+### Step 1: Start three nodes
 
 Open three separate terminals and run one command in each:
 
-**Terminal 1 — node1:**
+**Terminal 1: node1:**
 ```bash
 java -jar target/quorum-1.0-SNAPSHOT-jar-with-dependencies.jar \
   --id node1 \
@@ -157,7 +157,7 @@ java -jar target/quorum-1.0-SNAPSHOT-jar-with-dependencies.jar \
   --peers node2:8002,node3:8003
 ```
 
-**Terminal 2 — node2:**
+**Terminal 2: node2:**
 ```bash
 java -jar target/quorum-1.0-SNAPSHOT-jar-with-dependencies.jar \
   --id node2 \
@@ -165,7 +165,7 @@ java -jar target/quorum-1.0-SNAPSHOT-jar-with-dependencies.jar \
   --peers node1:8001,node3:8003
 ```
 
-**Terminal 3 — node3:**
+**Terminal 3: node3:**
 ```bash
 java -jar target/quorum-1.0-SNAPSHOT-jar-with-dependencies.jar \
   --id node3 \
@@ -181,7 +181,7 @@ Within 300ms one node will win the election and become leader. You will see logs
 [node3] Received heartbeat from node2 — resetting timer
 ```
 
-### Step 2 — Connect a client to any node
+### Step 2: Connect a client to any node
 
 Open a fourth terminal and connect to any node — it does not matter which:
 
@@ -189,7 +189,7 @@ Open a fourth terminal and connect to any node — it does not matter which:
 nc localhost 8001
 ```
 
-### Step 3 — Send commands
+### Step 3: Send commands
 
 Commands work exactly the same as single node. If you connect to a follower, it automatically forwards writes to the leader.
 
@@ -204,7 +204,7 @@ Commands work exactly the same as single node. If you connect to a follower, it 
 
 This is the most impressive thing Quorum demonstrates.
 
-### Step 1 — Start three nodes and write some data
+### Step 1: Start three nodes and write some data
 
 ```bash
 # Terminal 4 — client connected to node1
@@ -213,11 +213,11 @@ nc localhost 8001
 {"type":"CLIENT_PUT","key":"baz","value":"qux"}
 ```
 
-### Step 2 — Kill the leader
+### Step 2: Kill the leader
 
 Find which node is the leader from the logs. Press **Ctrl+C** in that terminal to kill it.
 
-### Step 3 — Watch re-election happen
+### Step 3: Watch re-election happen
 
 Within 300ms the remaining two nodes elect a new leader. You will see in their terminals:
 ```
@@ -225,7 +225,7 @@ Within 300ms the remaining two nodes elect a new leader. You will see in their t
 [node1] Won election for term 2 — now LEADER
 ```
 
-### Step 4 — Verify data is intact
+### Step 4: Verify data is intact
 
 Send a GET from the client — still connected to its original node:
 ```json
@@ -239,7 +239,7 @@ Response:
 
 Data is intact. Cluster is still serving requests. One node down, two nodes alive, majority maintained.
 
-### Step 5 — Restart the killed node
+### Step 5: Restart the killed node
 
 Run the same start command again in the killed terminal. The node rejoins as a follower, catches up with all missed log entries, and rejoins the cluster fully.
 
