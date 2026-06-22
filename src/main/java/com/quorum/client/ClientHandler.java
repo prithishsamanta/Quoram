@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+
 import com.quorum.network.MessageHandler;
 
 public class ClientHandler implements Runnable {
@@ -12,7 +13,6 @@ public class ClientHandler implements Runnable {
     private final MessageHandler messageHandler;
 
     public ClientHandler(Socket socket, MessageHandler messageHandler) {
-        // assign fields
         this.socket = socket;
         this.messageHandler = messageHandler;
     }

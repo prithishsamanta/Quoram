@@ -2,9 +2,15 @@ package com.quorum.network;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.quorum.rpc.AppendEntries;
+import com.quorum.rpc.RequestVote;
+import com.quorum.server.LogEntry;
 import com.quorum.server.RaftNode;
-import java.util.Map;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MessageHandler {
     // Takes raw JSON string
@@ -36,6 +42,10 @@ public class MessageHandler {
                     return handlePut(message);
                 case "CLIENT_DELETE":
                     return handleDelete(message);
+                case "REQUEST_VOTE":
+                    return handleRequestVote(message);
+                case "APPEND_ENTRIES":
+                    return handleAppendEntries(message);
                 default:
                     return buildResponse(false, null, "Unknown type: " + type);
             }
@@ -74,6 +84,45 @@ public class MessageHandler {
         }
         node.handleDelete(key);
         return buildResponse(true, null, "OK");
+    }
+
+    private String handleRequestVote(Map<String, Object> message) throws Exception {
+        int term = (Integer) message.get("term");
+        String candidateId = (String) message.get("candidateId");
+        int lastLogIndex = (Integer) message.get("lastLogIndex");
+        int lastLogTerm = (Integer) message.get("lastLogTerm");
+    
+        RequestVote.Request request = new RequestVote.Request(term, candidateId, lastLogIndex, lastLogTerm);
+        RequestVote.Response response = node.handleRequestVote(request);
+    
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("type", "REQUEST_VOTE_RESPONSE");
+        responseMap.put("term", response.term);
+        responseMap.put("voteGranted", response.voteGranted);
+        return mapper.writeValueAsString(responseMap);
+    }
+
+    private String handleAppendEntries(Map<String, Object> message) throws Exception {
+        int term = (Integer) message.get("term");
+        String leaderId = (String) message.get("leaderId");
+        int prevLogIndex = (Integer) message.get("prevLogIndex");
+        int prevLogTerm = (Integer) message.get("prevLogTerm");
+        int leaderCommit = (Integer) message.get("leaderCommit");
+    
+        // entries will be empty in Phase 3 but parse it properly anyway
+        List<LogEntry> entries = new ArrayList<>(); // Phase 3: always empty
+    
+        AppendEntries.Request request = new AppendEntries.Request(
+            term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit
+        );
+        AppendEntries.Response response = node.handleAppendEntries(request);
+    
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("type", "APPEND_ENTRIES_RESPONSE");
+        responseMap.put("term", response.term);
+        responseMap.put("success", response.success);
+        responseMap.put("nodeId", response.nodeId);
+        return mapper.writeValueAsString(responseMap);
     }
 
     // Builds a consistent JSON response every time
